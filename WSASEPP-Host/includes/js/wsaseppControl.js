@@ -7,10 +7,10 @@ const REFRESH_INTERVAL = 2.5;
 const LAT_AVERAGING_PERIOD = 60;
 
 // The amount of times last updated time is allowed to be the same for offline status
-const CONNECTION_LOSS_TOLERANCE = 30;
+const CONNECTION_LOSS_TOLERANCE = 5;
 
 // The amount of times last updated time is allowed to be the same with connection issues
-const CONNECTION_ISSUES_TOLERANCE = 20;
+const CONNECTION_ISSUES_TOLERANCE = 2;
 
 // The url that will return Bureau of Meteorology station data
 const BOM_COMPARISON_STATION_URL = "http://www.bom.gov.au/fwo/IDV60901/IDV60901.94865.json";
