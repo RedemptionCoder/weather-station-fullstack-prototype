@@ -1,0 +1,2 @@
+Main-Class: Main
+Class-Path: /usr/lib/wsssd/gson-2.8.6.jar /usr/lib/wsssd/activation-1.1.jar /usr/lib/wsssd/javax.mail.jar

@@ -1,0 +1,14 @@
+[Unit]
+Description=Weather Station Site Server
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=root
+ExecStart=java -jar /usr/bin/wsssd/wsssd.jar
+
+[Install]
+WantedBy=multi-user.target
