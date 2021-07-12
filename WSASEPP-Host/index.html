@@ -27,9 +27,9 @@
                         <span ng-bind="errorOutput">&lt;&lt;No Current Errors&gt;&gt;</span>    
                     </div>
                 </div>
-                <div class="performance-metrics">
-                    <div class="Latency">Latency: <span ng-bind="Latency">---</span></div>
-                    <div class="LastUpdated">Last updated: <span ng-bind="obstime">---</span></div>
+                <div class="performance-metrics" ng-style="performanceBackgroundColour">
+                    <div class="Latency" ng-style="latencyStyles">Latency: <span ng-bind="Latency">---</span></div>
+                    <div class="LastUpdated" ng-style="latencyStyles">Updated: <span ng-bind="obstime">---</span></div>
                 </div>
                 <div class="livedata">
                     <div class="overview sections">

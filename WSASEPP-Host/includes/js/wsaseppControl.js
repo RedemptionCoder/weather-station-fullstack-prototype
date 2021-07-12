@@ -7,7 +7,7 @@ const REFRESH_INTERVAL = 2.5;
 const LAT_AVERAGING_PERIOD = 60;
 
 // The amount of times last updated time is allowed to be the same for offline status
-const CONNECTION_LOSS_TOLERANCE = 5;
+const CONNECTION_LOSS_TOLERANCE = 24;
 
 // The amount of times last updated time is allowed to be the same with connection issues
 const CONNECTION_ISSUES_TOLERANCE = 2;
@@ -89,12 +89,6 @@ app.controller("wsaseppControl", function($scope, $http, $interval, $timeout, $C
         // Record the start time
         $ConnectionPerformance.StartTime = new Date();
 
-        /*
-        if ($http.pendingRequests.length > 0) {
-            $scope.reportError("More than one pending request");
-        }
-        */
-
         // Open the request object
         $http.get("getLiveObs.php?transmitterID=1&temp=1&speed=3&dir=8&rain=14&bar=12").then(
             function(response) {
@@ -169,7 +163,7 @@ app.controller("wsaseppControl", function($scope, $http, $interval, $timeout, $C
             }            
 
             $scope.WindPpeedLast = jsonData['WindPpeedLast'];              
-            $scope.WindDirLast = jsonData['WindDirLast'];         
+            $scope.WindDirLast = (parseFloat($scope.WindPpeedLast)>0) ? jsonData['WindDirLast']:"CALM";         
 
             if (performanceData) {$scope.displayServerInfo(jsonData, performanceData);}
             
@@ -248,6 +242,11 @@ app.controller("wsaseppControl", function($scope, $http, $interval, $timeout, $C
             
             // Get the timestamp set
             $scope.bomTimestamp = $scope.bomData.observations.data[0].aifstime_utc;
+
+            // If the view is in comparison mode, the data may be out of date, therefore refresh the data
+            if ($scope.isComparing) {
+                $scope.displayBomData($scope.bomData);
+            }
 
         },
         function(response) {});
@@ -437,6 +436,76 @@ app.controller("wsaseppControl", function($scope, $http, $interval, $timeout, $C
     }
 
     /**
+     * Changes the background colour of the performance display bar to something 
+     * that indicates an issue.
+     */
+    $scope.displayPerformanceIssueState = function() {
+        $scope.performanceBackgroundColour = {"background-color":"rgba(255, 60, 0, 0.58)","color":"white","transition":"background-color 10s, color 1s"};
+        $scope.latencyStyles = {"color":"#ffef00","transition":"color 1s"};
+    }
+
+    /**
+     * Sets the background colour of hte performance display bar back to normal
+     */
+    $scope.removePerformanceIssueState = function() {
+        $scope.performanceBackgroundColour = {"background-color":"#ffffff40","color":"midnightblue","transition":"background-color 10s, color 1s"};
+        $scope.latencyStyles = {"color":"midnightblue","transition":"color 1s"};
+    }
+
+    /**
+     * This function returns a string containing the date and time of the last packet receive time
+     * but will only return the time as a string if the last packet receive time falls on the same 
+     * date. If the last packet send receive time is on a different date, then it will return a string 
+     * with both the date and time. 
+     * 
+     * @param {string}  DateString  A date and time string in yyyy-mm-dd hh:mm:ss format.
+     * @return String   Just time if current date, otherwise date and time if different date
+     */
+    $scope.getLastPacketDateTime = function(DateString) {
+
+        try {
+
+            // Get the date portion
+            const dateTimeParts = DateString.split(" ");
+        
+            // Check that there are 2 elements for date and time
+            if (dateTimeParts.length > 1) {
+                // get date part
+                var datePart = dateTimeParts[0];
+                // get time part
+                var timePart = dateTimeParts[1];
+
+                // get current date and time
+                let lCurrentDate = new Date();
+                // set time portion to zero for current date
+                lCurrentDate.setHours(0,0,0,0);
+                
+                // Get the last packet rec time as date object
+                let lRecDateTime = new Date(datePart)
+                // set the time portion to zero as well
+                lRecDateTime.setHours(0,0,0,0);
+
+                // Check if the rec date time is same as current date
+                if (lCurrentDate.toUTCString()==lRecDateTime.toUTCString()) {
+                    return timePart; 
+                } else {
+                    return DateString;
+                }
+
+            } else {
+                // There was something wrong with the date string, so just return it as it is
+                return DateString;
+            }
+
+        } catch (err) {
+            
+            // DateString not in the expected format, so just return it
+            return DateString
+        }
+
+    }
+
+    /**
      * Displays server status and latency info such as last updated record and time taken from
      * collecting the data from the weahter station to displaying it on this page. 
      * @param {*} JsonObject 
@@ -452,45 +521,44 @@ app.controller("wsaseppControl", function($scope, $http, $interval, $timeout, $C
         // Calculate the total time taken for the previous packet
         let lTotalTimeTaken = $ConnectionPerformance.TimeTaken + JsonObject['prev_packet_latency'];
 
-        // Add latency value for averaging
-        $ConnectionPerformance.addNumber(lTotalTimeTaken);
-
         if ($ConnectionPerformance.LastRecDate==JsonObject['last_packet_rec_time']) {
             // Increment lost connection counter
             $ConnectionPerformance.PossibleDownSiteServerCount++;
             
             if ($ConnectionPerformance.PossibleDownSiteServerCount>=$ConnectionPerformance.ConnectionIssuesTolerance) {
                 // Display last updated
-                $scope.obstime = JsonObject['last_packet_rec_time'];
-                // Rerpot connectivity issues
-                $scope.reportError("Server Bandwidth/Performance Issues", true, true);
+                $scope.obstime = $scope.getLastPacketDateTime(JsonObject['last_packet_rec_time']);
+                
+                // Change the background colour of the performance bar                
+                $scope.displayPerformanceIssueState();
             }
 
         } else {
+            
             // Reset the connection loss counter
             $ConnectionPerformance.PossibleDownSiteServerCount = 0;
             // Display last updated
             $scope.obstime = "LIVE";
+            // Add latency value for averaging
+            $ConnectionPerformance.addNumber(lTotalTimeTaken);
             // clear errors
             $scope.clearErrors();
+            // Restore performance bar background colours            
+            $scope.removePerformanceIssueState();
         }
 
         if ($ConnectionPerformance.PossibleDownSiteServerCount<$ConnectionPerformance.ConnectionLossTolerance) {
             
-            if ($ConnectionPerformance.PossibleDownSiteServerCount>=$ConnectionPerformance.ConnectionIssuesTolerance) {
-                // Display the time as ---
-                $scope.Latency = "---";  
-            } else {
-                // Display the time taken
-                $scope.Latency = lTotalTimeTaken + 
-                    "ms (u" + JsonObject['prev_packet_latency'] + ", " + 
-                    " d" + $ConnectionPerformance.TimeTaken + ") Avg ("+$ConnectionPerformance.average()+"ms)";    
-            }
+            $scope.Latency = lTotalTimeTaken + 
+                "ms (u" + JsonObject['prev_packet_latency'] + ", " + 
+                " d" + $ConnectionPerformance.TimeTaken + ") Avg ("+$ConnectionPerformance.average()+"ms)";    
+        
         } else {
             // Display the time as ---
             $scope.Latency = "---";  
             // Report error that site server is offline
             $scope.reportError("Site Server Offline", true);
+            $scope.removePerformanceIssueState()
         }
 
         // Update the next previous time taken for this request
