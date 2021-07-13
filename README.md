@@ -1,6 +1,6 @@
 # WSASEP-Project-Prototype
 
-Testing the possibility of having a web page with live 2.5 second updates from a local Davis Vantage Vue weather station for the future <b>W</b>eather <b>S</b>tation <b>A</b>pp <strong>S</strong>oftware <b>E</b>ngineering <b>P</b>ractice <b>P</b>roject (WSASEPP). Right now this is just a prototype, and it works really well. Future development will include a spectacular web page with graphs, a wind rose, and many more. There are also plans for an iOS and Andriod app as well. 
+Testing the possibility of having a web page with live 2.5 second updates from a local Davis Vantage Vue weather station for the future <b>W</b>eather <b>S</b>tation <b>A</b>pp <strong>S</strong>oftware <b>E</b>ngineering <b>P</b>ortfolio <b>P</b>roject (WSASEPP). Right now this is just a prototype, and it works really well. Future development will include a spectacular web page with graphs, a wind rose, and many more. There are also plans for an iOS and Andriod app as well. 
 
 <h2>Software/System Components</h2>
 This software consists of two components; 
