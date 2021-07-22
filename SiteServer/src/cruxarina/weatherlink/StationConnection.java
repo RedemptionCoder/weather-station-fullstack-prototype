@@ -31,7 +31,7 @@ public class StationConnection implements StationInterface {
 		cHttpReceiveFile = "siteServerRec.php";
 		cLiveBufSize = 2000;
 		cLiveReceivingPort = 22222;
-		cLiveTimeout = 30000;
+		cLiveTimeout = 5000;
 		cStartTime = new GregorianCalendar();
 		setRefreshUpdateFrequency(60);
 		cDegradedPerformanceLatencyThreshold = 500;
@@ -500,30 +500,89 @@ public class StationConnection implements StationInterface {
 	 * 			were network errors.
 	 */
 	public boolean refreshLive() {
+						
+		// Reset the timer
+		LogFile.resetTimer();
 				
+		LogFile.startTimer("Obtaining live data from broadcast packet");
+		
 		if (!getLiveObservations()) {
+		
+			LogFile.stopTimer();
+			LogFile.logTimeTaken("Failed to get live data from broadcast");
 			
+			LogFile.startTimer("Requesting broadcast stream from device " + cDeviceIP);
 			// broadcast may not have started
 			if (!startLiveBroadcast()) {
+				
+				// Add memory status to the timer log as well
+				LogFile.addMemStatToTimerLog();
+				
+				// Send email alert
+				LogFile.sendTimerLogAsEmail("Catastrophic Failure: Could not start live broadcast!", "Wsssd Serivce Failed!");
+				
 				return false;
 			} else {
+				
+				LogFile.stopTimer();
+				LogFile.logTimeTaken("Broadcast stream requested from the device");
+				
+				LogFile.startTimer("Attempting to obtain live data from broadcast packet again");
+				
 				if (!getLiveObservations()) {
+					
+					// Add memory status to the timer log as well
+					LogFile.addMemStatToTimerLog();
+					
+					// Send email alert
+					LogFile.sendTimerLogAsEmail("Catastrophic Failure: Could not receive broadcast packets!", "Wsssd Serivce Failed!");
+					
 					return false;
 				}
+				
 			}
 		}
+		
+		LogFile.stopTimer("Data obtained from broadcast packet");
+		LogFile.logTimeTaken("Live data obtained");
+		
+		
+		LogFile.startTimer("Deserializing JSON data");
 		
 		if (!deserializeJSON()) {
 			logError("Could not deserialize JSON. " + lastError());
 			return false;
 		}
 		
+		LogFile.stopTimer();
+		LogFile.logTimeTaken("Successfully deserialized the JSON data");
+		
 		// Attempt to send the JSON data from the weather station to the web server
+				
 		if (cHttpHost.length()>0) {
+		
+			LogFile.startTimer("Attempting to send JSON data to web app server");
+						
 			if (!forwardToHttpHost()) {
 				logError("Could not forward local station data to HTTP host");
 				return false;
 			}
+			
+			LogFile.stopTimer();
+			LogFile.logTimeTaken("Successfully forwarded JSON data to web app server");
+			
+			// Record the Http Request Response Time
+			cHttpRequestResponseTime = LogFile.getTimeTaken() / 1000.00;
+			
+			// Log the time taken for the whole process.
+			LogFile.logTotalTimeTaken("Latest weather data forwarded");
+			
+			// Add memory status to the timer log as well
+			LogFile.addMemStatToTimerLog();
+			
+			// Report the performance of this run
+			reportPerformance((int)LogFile.getTotalTimeTaken());
+			
 		}
 		
 		return true;
@@ -1108,13 +1167,7 @@ public class StationConnection implements StationInterface {
 		
 		String lResponseString = "";
 		
-		// The time taken		
-		GregorianCalendar lStartTime, lEndTime;
-		double lTimeTaken=0;
-		
 		// Add the previous packet response time and packet receive time to the json string
-		
-		
 		
 		// Remove the closing bracket from the json string for adding more fields
 		cObservationsJSONString = cObservationsJSONString.substring(0, cObservationsJSONString.length()-1);
@@ -1138,23 +1191,8 @@ public class StationConnection implements StationInterface {
 		
 			try {
 				
-				// Note the start time
-				lStartTime = new GregorianCalendar();
-				
 				HttpResponse<String> lResponse = lClient.send(lRequest, HttpResponse.BodyHandlers.ofString());
 				lResponseString = lResponse.body();
-				
-				// Note the reponse receive time
-				lEndTime = new GregorianCalendar();
-
-				// Calculate time taken
-				lTimeTaken = (lEndTime.getTimeInMillis() - lStartTime.getTimeInMillis());
-				
-				// check the performance
-				reportPerformance((int)lTimeTaken);
-				
-				// Convert to seconds
-				cHttpRequestResponseTime = lTimeTaken / 1000.000;
 				
 			} catch (IOException e) {
 				logError(e.getMessage());
@@ -1196,8 +1234,13 @@ public class StationConnection implements StationInterface {
 			if (cDegradedPerformanceCount >= cDegradedPerformanceTollerance 
 					&& !cDegradedPerformanceState) {
 				
+				// Send an email alert
+					
+				// Send email with timings
+				LogFile.sendTimerLogAsEmail("Degraded Performance: App Server Response is slow!", "App Server Connectivity Poor");
+			
 				// Log an error that performance is degraded
-				logError("Degraded Performance: App Server Response is slow!", "App Server Connectivity Poor");
+				logError("Degraded Performance: App Server Response is slow!");
 				
 				// Set the degraded state to true
 				cDegradedPerformanceState = true;						
