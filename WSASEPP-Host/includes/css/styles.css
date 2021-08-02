@@ -1,6 +1,6 @@
 body {
     margin: 0px;
-    background-color: #3e5e68;
+    background-color: #3e5e68 !important;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   -khtml-user-select: none;
@@ -23,8 +23,9 @@ body {
   margin: 0px;
 }
 
-.MainContent {
-  background-color: #799497;  
+.MainContent, 
+.container_fluid {
+  background-color: #799497 !important;  
 }
 
 .performance-metrics {

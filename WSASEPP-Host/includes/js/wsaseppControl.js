@@ -183,12 +183,22 @@ app.controller("wsaseppControl", function($scope, $http, $interval, $timeout, $C
     $scope.initialiseView = function() {
 
         $scope.HeadingTitle = "Altitude Point Cook Live Weather Data";
+        $scope.bomHeadingTitle = "---";
+        
         $scope.errorOutput = "No Current Errors";
 
         $scope.AppTemp = "---";
+        $scope.bomAppTemp = "---";
+        
         $scope.Temp = "---";                       
+        $scope.bomTemp = "---";                       
+
         $scope.Hum = "---";                        
+        $scope.bomHum = "---";                        
+        
         $scope.DewPoint = "---";                   
+        $scope.bomDewPoint = "---";                   
+        
         $scope.WetBulb = "---";                    
         $scope.HeatIndex = "---";                  
         $scope.WindChill = "---";                  
@@ -198,9 +208,16 @@ app.controller("wsaseppControl", function($scope, $http, $interval, $timeout, $C
         $scope.WindDirScalarAvg_last_2_min = "---";
         $scope.WindSpeedHi_last_2_min = "---";     
         $scope.WindDirAtHiSpeedLast_2_min = "---"; 
+        
         $scope.WindSpeedAvgLast_10_min = "---";    
+        $scope.bomWindSpeedAvgLast_10_min = "---";    
+        
         $scope.WindDirScalarAvgLast_10_min = "---";
+        $scope.bomWindDirScalarAvgLast_10_min = "---";
+        
         $scope.WindSpeedHiLast_10_min = "---";     
+        $scope.bomWindSpeedHiLast_10_min = "---";     
+        
         $scope.WindDirAtHiSpeedLast_10_min = "---"; 
         $scope.RainRateLast = "---";               
         $scope.RainRateHi = "---";                 
@@ -212,7 +229,10 @@ app.controller("wsaseppControl", function($scope, $http, $interval, $timeout, $C
         $scope.RainStormStartAt = "---";           
         $scope.SolarRad = "---";                   
         $scope.UvIndex = "---";                    
+        
         $scope.RainfallDaily = "---";             
+        $scope.bomRainfallDaily = "---";             
+        
         $scope.RainfallMonthly = "---";            
         $scope.RainfallYear = "---";               
         $scope.RainStormLast = "---";              
@@ -226,7 +246,9 @@ app.controller("wsaseppControl", function($scope, $http, $interval, $timeout, $C
         $scope.InHumBottom = "---";                      
         $scope.InDewPoint = "---";                 
         $scope.InHeatIndex = "---";                
+        
         $scope.BarSeaLevel = "---";                
+        $scope.bomBarSeaLevel = "---";                
 
     }
 
@@ -239,13 +261,16 @@ app.controller("wsaseppControl", function($scope, $http, $interval, $timeout, $C
         $http.get("getApiResponse.php?url="+encodeURI(BOM_COMPARISON_STATION_URL)).then(function(response) {
             
             $scope.bomData = response.data;
+
+            // Load the bom data into scope variables
+            $scope.loadBomData($scope.bomData);
             
             // Get the timestamp set
             $scope.bomTimestamp = $scope.bomData.observations.data[0].aifstime_utc;
 
             // If the view is in comparison mode, the data may be out of date, therefore refresh the data
             if ($scope.isComparing) {
-                $scope.displayBomData($scope.bomData);
+                $scope.displayBomData();
             }
 
         },
@@ -254,30 +279,56 @@ app.controller("wsaseppControl", function($scope, $http, $interval, $timeout, $C
     }
 
     /**
-     * Takes the JSON string from the Bureau of Meteorology and extracts the data from it and places
-     * it into the comparison blocks on the page. 
+         * Takes the JSON string from the Bureau of Meteorology and extracts the data from it and places
+         * it into bom scope variables. 
+         * 
+         * @param {String} jsonData 
+         */
+    $scope.loadBomData = function(jsonData) {
+            
+        try {
+
+            $scope.bomHeadingTitle = jsonData.observations.data[0].name + 
+                " at " + jsonData.observations.data[0].local_date_time + " (bom.gov.au)";
+            $scope.bomAppTemp = jsonData.observations.data[0].apparent_t;
+            $scope.bomTemp = jsonData.observations.data[0].air_temp;
+            $scope.bomHum = jsonData.observations.data[0].rel_hum;
+            $scope.bomWindSpeedAvgLast_10_min = jsonData.observations.data[0].wind_spd_kmh;
+            $scope.bomWindSpeedHiLast_10_min = jsonData.observations.data[0].gust_kmh;
+            $scope.bomWindDirScalarAvgLast_10_min = jsonData.observations.data[0].wind_dir;
+            $scope.bomBarSeaLevel = jsonData.observations.data[0].press_msl;
+            $scope.bomRainfallDaily = jsonData.observations.data[0].rain_trace;
+            $scope.bomDewPoint = jsonData.observations.data[0].dewpt;
+            $scope.bomTimestamp = jsonData.observations.data[0].aifstime_utc;
+        
+        } catch (e) {return false;}
+
+        return true;
+
+    }
+
+    /**
+     * Takes the bom scope data and sets the scope variables which binds to the
+     * weather display blocks on the page
      * 
-     * @param {String} jsonData 
      */
-    $scope.displayBomData = function(jsonData) {
+    $scope.displayBomData = function() {
         
         // Clear all of the view elements for bom data.
         $scope.initialiseView();
 
         try {
 
-            $scope.HeadingTitle = jsonData.observations.data[0].name + 
-                " at " + jsonData.observations.data[0].local_date_time + " (bom.gov.au)";
-            $scope.AppTemp = jsonData.observations.data[0].apparent_t;
-            $scope.Temp = jsonData.observations.data[0].air_temp;
-            $scope.Hum = jsonData.observations.data[0].rel_hum;
-            $scope.WindSpeedAvgLast_10_min = jsonData.observations.data[0].wind_spd_kmh;
-            $scope.WindSpeedHiLast_10_min = jsonData.observations.data[0].gust_kmh;
-            $scope.WindDirScalarAvgLast_10_min = jsonData.observations.data[0].wind_dir;
-            $scope.BarSeaLevel = jsonData.observations.data[0].press_msl;
-            $scope.RainfallDaily = jsonData.observations.data[0].rain_trace;
-            $scope.DewPoint = jsonData.observations.data[0].dewpt;
-            $scope.bomTimestamp = jsonData.observations.data[0].aifstime_utc;
+            $scope.HeadingTitle = $scope.bomHeadingTitle;
+            $scope.AppTemp = $scope.bomAppTemp;
+            $scope.Temp = $scope.bomTemp;
+            $scope.Hum = $scope.bomHum;
+            $scope.WindSpeedAvgLast_10_min = $scope.bomWindSpeedAvgLast_10_min;
+            $scope.WindSpeedHiLast_10_min = $scope.bomWindSpeedHiLast_10_min;
+            $scope.WindDirScalarAvgLast_10_min = $scope.bomWindDirScalarAvgLast_10_min;
+            $scope.BarSeaLevel = $scope.bomBarSeaLevel;
+            $scope.RainfallDaily = $scope.bomRainfallDaily;
+            $scope.DewPoint = $scope.bomDewPoint;
         
         } catch (e) {}
 
@@ -417,20 +468,25 @@ app.controller("wsaseppControl", function($scope, $http, $interval, $timeout, $C
             $scope.errorOutput+="<br>"+message;
         }
 
-        // This will display the error bar up the top
+        // Show the modal
+        // Check error state, because we don't want this modal 
+        // to keep popping up. 
+        if (!$scope.isErrorState) $("#errorModal").modal();
+        
+        // This will display the error modal
         $scope.isErrorState = true;
-
-        // Change to a different colour if warning
-        $scope.errorBarBackgroundColour = (warning)?{"background-color":"#625454"}:{"background-color":"#c60000"};
-
+        
     }
-
     /**
      * Clears the error message bar and removes is from display.
      */
     $scope.clearErrors = function() {
 
-        $scope.errorOutput="&lt;&lt;No Errors&gt;&gt;";
+        $scope.errorOutput="No Errors";
+
+         // Remove the modal
+         $("#errorModal").modal('hide');
+
         $scope.isErrorState = false;
 
     }
@@ -506,6 +562,55 @@ app.controller("wsaseppControl", function($scope, $http, $interval, $timeout, $C
     }
 
     /**
+     * Converts the string containing the date and time in yyyy-mm-dd hh:mm:ss format into a Date object. 
+     * This function solves the problem with some browsers not supporting
+     * the date and time in this format as a parameter of the constructor for the Date object. 
+     * 
+     * @returns A Date object   The date object representing the date and time since receiving the last packet
+     */
+    $scope.getLastPacketRecTimeDateObject = function(dateString) {
+
+        try {
+
+            // Get the date portion
+            const lDateTimeParts = dateString.split(" ");
+        
+            // Check that there are 2 elements for date and time
+            if (lDateTimeParts.length > 1) {
+                // get date part
+                var lDatePart = lDateTimeParts[0];
+                // get time part
+                var lTimePart = lDateTimeParts[1];
+
+                // Split the date parameters
+                const lDateParts = lDatePart.split("-");
+
+                if (lDateParts.length > 2) {
+
+                    // Split the time parameters
+                    const lTimeParts = lTimePart.split(":");
+
+                    if (lTimeParts.length > 2) {
+                        
+                        // Create the new date object
+                        lDate = new Date(lDateParts[0], (lDateParts[1]-1), lDateParts[2], lTimeParts[0], lTimeParts[1], lTimeParts[2]);
+
+                        // Return the created date
+                        return lDate
+
+                    }
+                }
+
+            }
+
+        } catch (err) {}
+
+        // There was something wrong with the date string, so just attempt the date constructor
+        return new Date(dateString);
+
+    }
+
+    /**
      * Displays server status and latency info such as last updated record and time taken from
      * collecting the data from the weahter station to displaying it on this page. 
      * @param {*} JsonObject 
@@ -520,6 +625,12 @@ app.controller("wsaseppControl", function($scope, $http, $interval, $timeout, $C
 
         // Calculate the total time taken for the previous packet
         let lTotalTimeTaken = $ConnectionPerformance.TimeTaken + JsonObject['prev_packet_latency'];
+
+        // Get the amount of time since last packet was received
+        let lTimeSinceLastPacket = lEndTime - $scope.getLastPacketRecTimeDateObject(JsonObject['last_packet_rec_time']);
+
+        // Calculate possible down server count
+        $ConnectionPerformance.PossibleDownSiteServerCount = (lTimeSinceLastPacket/1000)/REFRESH_INTERVAL;
 
         if ($ConnectionPerformance.LastRecDate==JsonObject['last_packet_rec_time']) {
             // Increment lost connection counter
@@ -556,6 +667,10 @@ app.controller("wsaseppControl", function($scope, $http, $interval, $timeout, $C
         } else {
             // Display the time as ---
             $scope.Latency = "---";  
+
+            // Display last updated
+            $scope.obstime = $scope.getLastPacketDateTime(JsonObject['last_packet_rec_time']);
+
             // Report error that site server is offline
             $scope.reportError("Site Server Offline", true);
             $scope.removePerformanceIssueState()
@@ -593,14 +708,14 @@ app.controller("wsaseppControl", function($scope, $http, $interval, $timeout, $C
     // Initialise the app
     $scope.initialiseApp();
 
+    // Get the bom comparison data
+    $scope.getBomData();
+
     // Initialise the view
     $scope.initialiseView();
 
     // Get the weather data straight away first
     $scope.getWeatherData();
-
-    // Get the bom comparison data
-    $scope.getBomData();
 
     // Start the refresh timer
     $interval($scope.getWeatherData, ($ConnectionPerformance.RefreshInterval * 1000))
