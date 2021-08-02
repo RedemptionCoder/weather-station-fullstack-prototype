@@ -1,6 +1,6 @@
 body {
     margin: 0px;
-    background-color: #3e5e68;
+
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   -khtml-user-select: none;
@@ -60,6 +60,7 @@ body {
   color: white;
   padding: 2px 0px;
   font-size: small;
+  display: none;
 }
 
 .sections {
@@ -159,6 +160,14 @@ body {
 
 .LastUpdated {
   float: right;
+}
+
+.CompOrig {
+  display:inline;
+}
+
+.CompObs {
+  display:none;
 }
 
 .compblock:hover {

@@ -287,7 +287,7 @@ class WeatherStationApp extends Common {
 		$lWindChill = $this->cStationDataReceiver->getWindChill();
 		$lThwIndex = $this->cStationDataReceiver->getThwIndex();
 		$lThswIndex = $this->cStationDataReceiver->getThswIndex();
-		$lWindSpeedLast = $this->cStationDataReceiver->getWindPpeedLast();
+		$lWindPpeedLast = $this->cStationDataReceiver->getWindPpeedLast();
 		$lWindDirLast = $this->cStationDataReceiver->getWindDirLast();
 		$lWindSpeedAvgLast_1_min = $this->cStationDataReceiver->getWindSpeedAvgLast_1_min();
 		$lWindDirScalarAvg_last_1_min = $this->cStationDataReceiver->getWindDirScalarAvg_last_1_min();
@@ -372,11 +372,8 @@ class WeatherStationApp extends Common {
         // would have stopped, and the Rain Storm Start At value would not make any sense.
         $this->cLatestObservations->setRainStormStartAt($lRainStormStartAt);     
         $this->cLatestObservations->setRainStorm($lRainStorm);
-        $this->cLatestObservations->setWindPpeedLast($lWindSpeedLast);
-		
-        // If there is no wind speed, there is no wind direction. So don't set the wind direction
-        if ($lWindSpeedLast>0) $this->cLatestObservations->setWindDirLast($lWindDirLast); 
-        
+        $this->cLatestObservations->setWindPpeedLast($lWindPpeedLast);
+		$this->cLatestObservations->setWindDirLast($lWindDirLast);   
         $this->cLatestObservations->setRainRateLast($lRainRateLast);
 
         $this->cLatestObservations->setObservationReceiveTime($lObservationReceiveTime);

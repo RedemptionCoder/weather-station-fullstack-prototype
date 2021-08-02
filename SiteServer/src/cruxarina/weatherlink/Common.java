@@ -14,7 +14,6 @@ package cruxarina.weatherlink;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.Properties;
 
 import javax.activation.*;
@@ -39,17 +38,12 @@ public class Common {
 	Common() {
 		
 		cLog = new ArrayList<String>();
-		cTimerLog = new ArrayList<String>();
 		cLastError = "";
 		cLastMessage = "";
-		cSaveLogToMemory = false;
 		cErrorTag = "ERROR: ";
 		cLogFilePath = "";
 		cLogFileAccessible = false;
 		cDebugOutput = false;
-		cStartTime = new GregorianCalendar();
-		cStopTime = new GregorianCalendar();
-		cTimeTakenInMilliseconds = 0;
 		cSendingAccountUsernameEmail = "";
 		cFromDisplayName = "";
 		cPassword = "";
@@ -58,10 +52,6 @@ public class Common {
 		cSmtpPort = "587";
 		cUseAuth = "true";
 		cUseStartTls = "true";
-		
-		// Record the initial memory usage
-		cFreeMemoryAtStart = Runtime.getRuntime().freeMemory();
-		cMemoryUsedAtStart = Runtime.getRuntime().totalMemory();
 		
 	}
 	
@@ -147,22 +137,6 @@ public class Common {
 	 */
 	public boolean isLogFileAccessible() {
 		return cLogFileAccessible;
-	}
-	
-	/**
-	 * Sets the whether to save the log to memory as well as log file
-	 * @param value	True to save log to memory as well, or false if not (default)
-	 */
-	public void setSaveLogToMemory(boolean value) {
-		cSaveLogToMemory = value;
-	}
-	
-	/**
-	 * Gets whether the log will be saved to memory or not
-	 * @return	true If saving 
-	 */
-	public boolean isSaveLogToMemory() {
-		return cSaveLogToMemory;
 	}
 	
 	/**
@@ -364,52 +338,6 @@ public class Common {
 	}
 	
 	/**
-	 * Send an email with the contents of the log in memory.
-	 * @param Message	The message to send
-	 * @param Subject	The subject
-	 */
-	public void sendLogAsEmail(String Message, String Subject) {
-		
-		// Print out the message
-		String lMessageBody = String.format("\n%s\n\n", Message);
-		
-		// Print log message contents
-		lMessageBody += String.format("The following events were logged:\n\n");
-		
-		// Print the contents of the log
-		for (String logItem : cLog) {
-			lMessageBody += String.format("\t%s\n", logItem);
-		}
-		
-		// Send the email
-		sendMailAlert(lMessageBody, Subject);
-		
-	}
-	
-	/**
-	 * Send an email with the contents of the log in memory.
-	 * @param Message	The message to send
-	 * @param Subject	The subject
-	 */
-	public void sendTimerLogAsEmail(String Message, String Subject) {
-		
-		// Print out the message
-		String lMessageBody = String.format("\n%s\n\n", Message);
-		
-		// Print log message contents
-		lMessageBody += String.format("The following events were logged:\n\n");
-		
-		// Print the contents of the log
-		for (String logItem : cTimerLog) {
-			lMessageBody += String.format("\t%s\n", logItem);
-		}
-		
-		// Send the email
-		sendMailAlert(lMessageBody, Subject);
-		
-	}
-	
-	/**
 	 * Gets the last error that was logged
 	 * @return The last error message
 	 */
@@ -486,347 +414,6 @@ public class Common {
 		
 	}
 	
-	/**
-	 * Clears the log in memory. Note that this will not clear the log file.
-	 * If the log file is not accessible, or the log messages can't be written
-	 * to the log file, the log will not clear.
-	 * @return	true If the log file is accessible and the log was cleared successfully
-	 * 			or false if the log file was not accessible. 
-	 */
-	public boolean clearLogs() {
-		
-		if (cLogFileAccessible) {
-			cLog.clear();
-		} else {
-			return false; 
-		}
-		
-		return true;
-	}
-	
-	/**
-	 * Resets the timer and sets the total time taken to 
-	 * zero milliseconds and clears the timer log
-	 */
-	public void resetTimer() {
-		cTimeTakenInMilliseconds = 0;
-		cStartTime = new GregorianCalendar();
-		// Clear the timer log as well
-		cTimerLog = new ArrayList<String>();
-	}
-	
-	/**
-	 * Records the start time for the timer
-	 */
-	public void startTimer() {
-		
-		// Record the start time
-		cStartTime = new GregorianCalendar();
-		
-	}
-	
-	/**
-	 * Start the timer and log a message in the logs
-	 * @param Message	The message to include for this start of timer
-	 */
-	public void startTimer(String Message) {
-		
-		// Log the message if in debug mode
-		if (cDebugOutput) {logMessage(Message);}
-		
-		// Write the message to log in memory
-		cTimerLog.add(getTimeStamp() + " " + Message);
-		
-		// Record the start time
-		startTimer();
-		
-	}
-	
-	/**
-	 * Records the stop time for the timer
-	 */
-	public void stopTimer() {
-		
-		// Record the stop time
-		cStopTime = new GregorianCalendar();
-		
-		// Add the total time 
-		cTimeTakenInMilliseconds += getTimeTaken();
-		
-	}
-	
-	/**
-	 * Stop the timer and log a message in the logs
-	 * @param Message	The message to include for this stop of timer
-	 */
-	public void stopTimer(String Message) {
-		
-		// Log the message if in debug mode
-		if (cDebugOutput) {logMessage(Message);}
-		
-		// Write the message to log in memory
-		cTimerLog.add(getTimeStamp() + " " + Message);
-		
-		// Record the stop time
-		stopTimer();
-		
-	}
-	
-	/**
-	 * Returns the time taken as a string suitable for direct inclusion in a log
-	 * @return	String	Time taken as string
-	 */
-	public String getTimeTakenAsString() {
-		
-		double lTimeTaken = (cStopTime.getTimeInMillis() - cStartTime.getTimeInMillis());
-		
-		if (lTimeTaken > 1000) {
-			
-			// Convert to seconds
-			lTimeTaken = lTimeTaken / 1000;
-			if (lTimeTaken > 60) {
-				
-				// Convert to minutes
-				lTimeTaken = lTimeTaken / 60;
-				if (lTimeTaken > 60) {
-					
-					// Convert to hours
-					lTimeTaken = lTimeTaken / 60;
-					if (lTimeTaken > 24) {
-						
-						// Convert to days
-						lTimeTaken = lTimeTaken / 24;
-						
-						// return time taken as string
-						return Double.toString(lTimeTaken) + " days";
-					} else {
-						// return time taken as string
-						return Double.toString(lTimeTaken) + " hours";
-					}
-				} else {
-					// return time taken as string
-					return Double.toString(lTimeTaken) + " minutes";
-				}
-			} else {
-				// return time taken as string
-				return Double.toString(lTimeTaken) + " seconds";
-			}
-		}
-		
-		// return time taken as string
-		return Double.toString(lTimeTaken) + " milliseconds";
-		
-	}
-	
-	/**
-	 * Gets the time taken from when the timer was started to when the timer was stopped.
-	 * @return	The time taken in milliseconds
-	 */
-	public double getTimeTaken() {
-		return (cStopTime.getTimeInMillis() - cStartTime.getTimeInMillis());
-	}
-	
-	/**
-	 * Returns the total time taken as a string suitable for direct inclusion in a log
-	 * @return	String	Time total taken as string
-	 */
-	public String getTotalTimeTakenAsString() {
-		
-		// The the total time taken 
-		double lTimeTaken = getTotalTimeTaken();
-		
-		if (cTimeTakenInMilliseconds > 1000) {
-			
-			// Convert to seconds
-			lTimeTaken = lTimeTaken / 1000;
-			if (lTimeTaken > 60) {
-				
-				// Convert to minutes
-				lTimeTaken = lTimeTaken / 60;
-				if (lTimeTaken > 60) {
-					
-					// Convert to hours
-					lTimeTaken = lTimeTaken / 60;
-					if (lTimeTaken > 24) {
-						
-						// Convert to days
-						lTimeTaken = lTimeTaken / 24;
-						
-						// return time taken as string
-						return Double.toString(lTimeTaken) + " days";
-					} else {
-						// return time taken as string
-						return Double.toString(lTimeTaken) + " hours";
-					}
-				} else {
-					// return time taken as string
-					return Double.toString(lTimeTaken) + " minutes";
-				}
-			} else {
-				// return time taken as string
-				return Double.toString(lTimeTaken) + " seconds";
-			}
-		}
-		
-		// return time taken as string
-		return Double.toString(lTimeTaken) + " milliseconds";
-		
-	}
-	
-	/**
-	 * Gets the total time taken from when the timer was originally started to when the timer was stopped.
-	 * @return	The time taken in milliseconds
-	 */
-	public double getTotalTimeTaken() {
-		return cTimeTakenInMilliseconds;
-	}
-	
-	/**
-	 * Logs the message supplied with the time taken
-	 * @param Message	The message to include
-	 * @return 			The time taken in milliseconds
-	 */
-	public double logTimeTaken(String Message) {
-		
-		// Only log the time taken if in debug mode
-		if (cDebugOutput) {
-			// Log the message
-			logMessage(Message + " in " + getTimeTakenAsString());
-		} 
-		
-		// Add this to the timer log as well
-		cTimerLog.add(getTimeStamp() + " " + Message + " in " + getTimeTakenAsString());
-		
-		// Return the time taken
-		return getTimeTaken();
-	}
-	
-	/**
-	 * Logs the message supplied with the time taken
-	 * @param Message		The message to include
-	 * @param DebugOnly		Set to true to force the message even if not in debug mode. Default is false
-	 */
-	public void logTimeTaken(String Message, boolean DebugOnly) {
-		
-		// Only log the time taken if in debug mode
-		if (cDebugOutput || !DebugOnly) {
-			// Log the message
-			logMessage(Message + " in " + getTimeTakenAsString());
-		}
-	}
-	
-	/**
-	 * Logs the message supplied with the total time taken since last timer reset
-	 * @param Message	The message to include
-	 * @return 			The total time taken in milliseconds
-	 */
-	public double logTotalTimeTaken(String Message) {
-		
-		// Only log the time taken if in debug mode
-		if (cDebugOutput) {
-			// Log the message
-			logMessage(Message + " in " + getTotalTimeTakenAsString());
-		} 
-		
-		// Add this to the timer log as well
-		cTimerLog.add(getTimeStamp() + " " + Message + " in " + getTotalTimeTakenAsString());
-		
-		// Return the time taken
-		return getTotalTimeTaken();
-	}
-	
-	// Memory Functions getters and setters
-	
-	/**
-	 * Gets the free memory available at the start
-	 * @return	Free memory in bytes
-	 */
-	public long getFreeMemoryAtStart() {
-		return cFreeMemoryAtStart;
-	}
-	
-	/**
-	 * Gets the free memory available at the start
-	 * @return	Free memory in megabytes
-	 */
-	public long getFreeMemoryAtStartInMB() {
-		return cFreeMemoryAtStart / 1048576;
-	}
-	
-	/**
-	 * Gets the memory used at the start
-	 * @return	Used memory in bytes
-	 */
-	public long getMemoryUsedAtStart() {
-		return cMemoryUsedAtStart;
-	}
-	
-	/**
-	 * Gets the memory used at the start
-	 * @return	Used memory in megabytes
-	 */
-	public long getMemoryUsedyAtStartInMB() {
-		return cMemoryUsedAtStart / 1048576;
-	}
-	
-	/**
-	 * Gets the amount of free memory currently
-	 * @return	The amount of free memory 
-	 */
-	public long getFreeMemory() {
-		return Runtime.getRuntime().freeMemory();
-	}
-	
-	/**
-	 * Gets the amount of free memory in megabytes
-	 * @return	The amount of free memory in megabytes
-	 */
-	public long getFreeMemoryInMB() {
-		return getFreeMemory() / 1048576;
-	}
-	
-	/**
-	 * Gets the amount of memory used currently
-	 * @return	The amount of memory being used
-	 */
-	public long getMemoryUsed() {
-		return Runtime.getRuntime().totalMemory();
-	}
-	
-	/**
-	 * Gets the amount of memory used currently in megabytes
-	 * @return	The amount of memory being used in megabytes
-	 */
-	public long getMemoryUsedInMB() {
-		return getMemoryUsed() / 1048576;
-	}
-	
-	/**
-	 * Runs the Java runtime garbage collector to try and free up some
-	 * memory. 
-	 */
-	public void freeUpMemory() {
-		Runtime.getRuntime().gc();
-	}
-		
-	/**
-	 * Adds memory status to the timer log, and if in debug mode, to the main log as well
-	 */
-	public void addMemStatToTimerLog() {
-		cTimerLog.add(String.format("\nMemory used at start: %d MB, Free at Start: %d MB", getMemoryUsedyAtStartInMB(), getFreeMemoryAtStartInMB()));
-		cTimerLog.add(String.format("\nMemory used currently: %d MB, Free: %d MB", getMemoryUsedInMB(), getFreeMemoryInMB()));
-		if (cDebugOutput) addMemStatToLog();
-	}
-	
-	/**
-	 * Adds memory status to the log
-	 */
-	public void addMemStatToLog() {
-		logMessage(String.format("\nMemory used at start: %d MB, Free at Start: %d MB", getMemoryUsedyAtStartInMB(), getFreeMemoryAtStartInMB()));
-		logMessage(String.format("\nMemory used currently: %d MB, Free: %d MB", getMemoryUsedInMB(), getFreeMemoryInMB()));
-	}
-	
-	// end Memory Functions
 	
 	// PRIVATE METHODS
 	
@@ -878,20 +465,22 @@ public class Common {
 
 	/**
 	 * Tries to write a message or error to the log file. If this fails, the error or message gets added
-	 * to log in memory. The error or message will get added to the log in memory as well if the 
-	 * cSaveLogToMemory flag is set to true
+	 * to log in memory.
 	 * @param Message	The message or error to be logged
 	 */
 	private void logErrorOrMessage(String Message) {
 	
-		cLogFileAccessible = writeToLogFile(Message);
-		
-		if (!cLogFileAccessible || cSaveLogToMemory) {
+		if (!writeToLogFile(Message)) {
 			
 			// Could not write the message to the log file, so store it in memory
 			cLog.add(getTimeStamp() + " " + Message);
-						
+			
+			// Mark log file as not usable
+			cLogFileAccessible = false;
 		}
+		
+		// Mark log file as usable
+		cLogFileAccessible = true;
 		
 	}
 	
@@ -902,7 +491,7 @@ public class Common {
 	protected String getTimeStamp() {
 		
 		LocalDateTime lTimestamp = LocalDateTime.now();
-		return lTimestamp.format(DateTimeFormatter.ofPattern("MMM d HH:mm:ss"));
+		return lTimestamp.format(DateTimeFormatter.ofPattern("MMM d H:m:s"));
 		
 	}
 	
@@ -984,18 +573,11 @@ public class Common {
 	// The list of errors that may have occurred
 	private ArrayList<String> cLog;
 	
-	// The list of timer events 
-	private ArrayList<String> cTimerLog;
-	
 	// The last error logged
 	private String cLastError;
 	
 	// The last message that was logged
 	private String cLastMessage;
-	
-	// If true, this will put log messages in memory as well as 
-	// the error log file
-	private boolean cSaveLogToMemory;
 	
 	// A configuration file
 	private ConfigFile cConfig;
@@ -1003,7 +585,7 @@ public class Common {
 	// The string to put in front of errors
 	private String cErrorTag;
 	
-	// The path to the log file
+	// The path to the logfile
 	private String cLogFilePath;
 	
 	// Whether the log file is accessible
@@ -1011,15 +593,6 @@ public class Common {
 	
 	// Used for debugging
 	private boolean cDebugOutput;
-	
-	// the start time for the timer
-	private GregorianCalendar cStartTime;
-	
-	// the end time for the timer
-	private GregorianCalendar cStopTime;
-	
-	// The total time taken 
-	private double cTimeTakenInMilliseconds;
 	
 	// email related attributes --------------------------------------------
 	
@@ -1046,18 +619,6 @@ public class Common {
 	
 	// Whether or not to use STARTTLS
 	private String cUseStartTls;
-	
-	// memory management functions
-	
-	// The amount of free memory at the start
-	private long cFreeMemoryAtStart;
-	
-	// The amount of memory used at start
-	private long cMemoryUsedAtStart;
-	
-	
-	
-	
 	
 	
 	
