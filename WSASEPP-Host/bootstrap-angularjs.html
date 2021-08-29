@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Live Weather Reading - Altitude Point Cook Live</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" >
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        <link rel="apple-touch-icon" href="./includes/images/bootstrap-angular.png">
+        <meta name="apple-mobile-web-app-title" content="Altitude Weather">
+        <link rel="icon" href="./includes/images/bootstrap-angular.png">
+        <link rel="stylesheet" href="includes/css/bootstrap.min.css">
+        <script src="includes/js/angular.js"></script>
+        <script src="includes/js/jquery.min.js"></script> 
+        <script src="includes/js/popper.min.js"></script>
+        <script src="includes/js/bootstrap.min.js"></script>
+        <script src="includes/js/wsasepp.js"></script>
+        <script src="includes/js/wsaseppControl-bs.js"></script>
+    </head>
+    <body class="bg-info">
+        <div ng-app="wsasepp" ng-controller="wsaseppControl">
+            <div class="container_fluid bg-info">
+                
+                <!-- The header title bar -->
+
+                <div class="row bg-info m-0">
+                    <div class="col">
+                        <h1 ng-bind="HeadingTitle" class="text-center text-light">Altitude Point Cook Live Weather Data</h1>
+                    </div>
+                </div>
+
+                <!-- Performance and latency information -->
+
+                <div class="row m-0">
+                    <div class="col" ng-style="performanceBackgroundColour">
+                        <div class="d-flex justify-content-between py-1 small">
+                            <div ng-style="latencyStyles">Latency: <span ng-bind="Latency">---</span></div>
+                            <div ng-style="latencyStyles">Updated: <span ng-bind="obstime">---</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-danger alert-dismissible fade show py-1" ng-show="isErrorState">
+                   <button type="button" class="close py-1" data-dismiss="alert">&times;</button>
+                   <strong>Errors! </strong><span ng-bind="errorOutput">&lt;&lt;No Current Errors&gt;&gt;</span>
+                </div>
+
+            </div>
+
+            <div class="container_fluid bg-light">
+                <!-- The Error Modal -->
+
+                <div class="modal fade" id="errorModal">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                    
+                            <!-- Modal Header -->
+                            <div class="modal-header">
+                                <h4 class="modal-title">An Error Has Occurred</h4>
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            </div>
+                    
+                            <!-- Modal body -->
+                            <div class="modal-body">
+                                <span ng-bind="errorOutput">&lt;&lt;No Current Errors&gt;&gt;</span>
+                            </div>
+                    
+                            <!-- Modal footer -->
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                            </div>
+                    
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Overview sections -->
+
+                <div class="row px-3 m-0">
+                    <div class="col text-center">
+                        <h3 class="py-3">Weather Overview</h3>
+
+                        <button data-toggle="popover" data-placement="bottom" data-content="{{bomAppTemp}}&#8451 at {{bomHeadingTitle}}" ng-mousedown="checkBomUpdates()" type="button" class="btn btn-info mt-1 px-4 py-1">
+                            <h6 class="m-0">Feels Like</h6>
+                            <p class="m-0"><span ng-bind="AppTemp">---</span>&#8451</p>
+                        </button>
+
+                        <button data-toggle="popover" data-placement="bottom" data-content="{{bomTemp}}&#8451 at {{bomHeadingTitle}}" ng-mousedown="checkBomUpdates()" type="button" class="btn btn-info mt-1 px-4 py-1">
+                            <h6 class="m-0">Temperature</h6>
+                            <p class="m-0"><span ng-bind="Temp">---</span>&#8451</p>
+                        </button>
+
+                        <button data-toggle="popover" data-placement="bottom" data-content="{{bomHum}}&percnt; at {{bomHeadingTitle}}" ng-mousedown="checkBomUpdates()" type="button" class="btn btn-info mt-1 px-4 py-1">
+                            <h6 class="m-0">Humidity</h6>
+                            <p class="m-0"><span ng-bind="Hum">---</span>&percnt;</p>
+                        </button>
+
+                        <button data-toggle="popover" data-placement="bottom" data-content="{{bomWindSpeedAvgLast_10_min}} km/h ({{bomWindSpeedHiLast_10_min}} km/h) at {{bomHeadingTitle}}" ng-mousedown="checkBomUpdates()" type="button" class="btn btn-info mt-1 px-4 py-1">
+                            <h6 class="m-0">Wind Speed <i>(Gust)</i></h6>
+                            <p class="m-0"><span ng-bind="WindSpeedAvgLast_10_min">---</span> km/h <i>(<span ng-bind="WindSpeedHiLast_10_min">---</span> km/h)</i></p>
+                        </button>
+
+                        <button data-toggle="popover" data-placement="bottom" data-content="{{bomWindDirScalarAvgLast_10_min}} (na) at {{bomHeadingTitle}}" ng-mousedown="checkBomUpdates()" type="button" class="btn btn-info mt-1 px-4 py-1">
+                            <h6 class="m-0">Wind Dir <i>(Gust)</i></h6>
+                            <p class="m-0"><span ng-bind="WindDirScalarAvgLast_10_min">---</span> <i>(<span ng-bind="WindDirAtHiSpeedLast_10_min">---</span>)</i></p>
+                        </button>
+    
+                        <button type="button" class="btn btn-primary mt-1 px-4 py-1">
+                            <h6 class="m-0">Wind Speed (Live)</h6>
+                            <p class="m-0"><span ng-bind="WindPpeedLast">---</span> km/h</p>
+                        </button>
+
+                        <button type="button" class="btn btn-primary mt-1 px-4 py-1">
+                            <h6 class="m-0">Wind Dir (Live)</h6>
+                            <p class="m-0"><span ng-bind="WindDirLast">---</span></p>
+                        </button>
+
+                        <button data-toggle="popover" data-placement="bottom" data-content="{{bomBarSeaLevel}}hPa at {{bomHeadingTitle}}" ng-mousedown="checkBomUpdates()" type="button" class="btn btn-info mt-1 px-4 py-1">
+                            <h6 class="m-0">Pressure</h6>
+                            <p class="m-0"><span ng-bind="BarSeaLevel">---</span>hPa</p>
+                        </button>
+
+                        <button type="button" class="btn btn-secondary mt-1 px-4 py-1">
+                            <h6 class="m-0">Rain Storm Start</h6>
+                            <p class="m-0"><span ng-bind="RainStormStartAt">---</span></p>
+                        </button>
+
+                        <button type="button" class="btn btn-secondary mt-1 px-4 py-1">
+                            <h6 class="m-0">Rain Storm Amount</h6>
+                            <p class="m-0"><span ng-bind="RainStorm">---</span> mm</p>
+                        </button>
+
+                        <button data-toggle="popover" data-placement="bottom" data-content="{{bomRainfallDaily}} mm at {{bomHeadingTitle}}" ng-mousedown="checkBomUpdates()" type="button" class="btn btn-info mt-1 px-4 py-1">
+                            <h6 class="m-0">Rain Today</h6>
+                            <p class="m-0"><span ng-bind="RainfallDaily">---</span> mm</p>
+                        </button>
+
+                        <button type="button" class="btn btn-secondary mt-1 px-4 py-1">
+                            <h6 class="m-0">Rain Rate</h6>
+                            <p class="m-0"><span ng-bind="RainRateLast">---</span> mm/hr</p>
+                        </button>
+
+                        <button type="button" class="btn btn-secondary mt-1 px-4 py-1">
+                            <h6 class="m-0">Highest Rate</h6>
+                            <p class="m-0"><span ng-bind="RainRateHi">---</span> mm/hr</p>
+                        </button>
+
+                        <button type="button" class="btn btn-secondary mt-1 px-4 py-1">
+                            <h6 class="m-0">Indoor Feels</h6>
+                            <p class="m-0"><span ng-bind="InAppTemp">---</span>&#8451</p>
+                        </button>
+
+                        <button type="button" class="btn btn-secondary mt-1 px-4 py-1">
+                            <h6 class="m-0">Temp. Indoor</h6>
+                            <p class="m-0"><span ng-bind="InTemp">---</span>&#8451</p>
+                        </button>
+                        
+                        <button type="button" class="btn btn-secondary mt-1 px-4 py-1">
+                            <h6 class="m-0">Hum. Indoor</h6>
+                            <p class="m-0"><span ng-bind="InHum">---</span>&#8451</p>
+                        </button>
+                        
+                    </div>
+                </div>
+
+                <div class="row px-3 m-0">
+                    <div class="col text-center">
+                        
+                        <h3 class="py-3">Wind Last 2 Minutes</h3>
+
+                        <button type="button" class="btn btn-secondary mt-1 px-4 py-1">
+                            <h6 class="m-0">Wind Speed <i>(Gust)</i></h6>
+                            <p class="m-0"><span ng-bind="WindSpeedAvgLast_2_min">---</span> km/h <i>(<span ng-bind="WindSpeedHi_last_2_min">---</span> km/h)</i></p>
+                        </button>
+                        
+                        <button type="button" class="btn btn-secondary mt-1 px-4 py-1">
+                            <h6 class="m-0">Wind Dir <i>(Gust)</i></h6>
+                            <p class="m-0"><span ng-bind="WindDirScalarAvg_last_2_min">---</span> <i>(<span ng-bind="WindDirAtHiSpeedLast_2_min">---</span>)</i></p>
+                        </button>
+
+                    </div>
+                </div>
+
+                <div class="row px-3 m-0">
+                    <div class="col text-center">
+                        
+                        <h3 class="py-3">Rainfall</h3>
+                         
+                        <button type="button" class="btn btn-secondary mt-1 px-4 py-1">
+                            <h6 class="m-0">Last 15 min</h6>
+                            <p class="m-0"><span ng-bind="RainfallLast_15_min">---</span> mm</p>
+                        </button>
+
+                        <button type="button" class="btn btn-secondary mt-1 px-4 py-1">
+                            <h6 class="m-0">Higest Rate (15min)</h6>
+                            <p class="m-0"><span ng-bind="RainRateHiLast_15_min">---</span> mm/hr</p>
+                        </button>
+
+                        <button type="button" class="btn btn-secondary mt-1 px-4 py-1">
+                            <h6 class="m-0">Last 60 min</h6>
+                            <p class="m-0"><span ng-bind="RainfallLast_60_min">---</span> mm</p>
+                        </button>
+
+                        <button type="button" class="btn btn-secondary mt-1 px-4 py-1">
+                            <h6 class="m-0">Last 24 hr</h6>
+                            <p class="m-0"><span ng-bind="RainfallLast_24_hr">---</span> mm</p>
+                        </button>
+
+                        <button type="button" class="btn btn-secondary mt-1 px-4 py-1">
+                            <h6 class="m-0">Last Rain Event Start</h6>
+                            <p class="m-0"><span ng-bind="RainStormLastStartAt">---</span></p>
+                        </button>
+
+                        <button type="button" class="btn btn-secondary mt-1 px-4 py-1">
+                            <h6 class="m-0">Last Rain Event Ended</h6>
+                            <p class="m-0"><span ng-bind="RainStormLastEndAt">---</span></p>
+                        </button>
+
+                        <button type="button" class="btn btn-secondary mt-1 px-4 py-1">
+                            <h6 class="m-0">Last Storm Amount</h6>
+                            <p class="m-0"><span ng-bind="RainStormLast">---</span> mm</p>
+                        </button>
+
+                        <button type="button" class="btn btn-secondary mt-1 px-4 py-1">
+                            <h6 class="m-0">This Month</h6>
+                            <p class="m-0"><span ng-bind="RainfallMonthly">---</span> mm</p>
+                        </button>
+
+                        <button type="button" class="btn btn-secondary mt-1 px-4 py-1">
+                            <h6 class="m-0">This Year</h6>
+                            <p class="m-0"><span ng-bind="RainfallYear">---</span> mm</p>
+                        </button>
+                        
+                    </div>
+                </div>
+
+                <div class="row px-3 m-0">
+                    <div class="col text-center">
+                        
+                        <h3 class="py-3">Other</h3>
+
+                        <button data-toggle="popover" data-placement="bottom" data-content="{{bomDewPoint}} &#8451 at {{bomHeadingTitle}}" ng-mousedown="checkBomUpdates()" type="button" class="btn btn-info mt-1 px-4 py-1">
+                            <h6 class="m-0">Dew Point</h6>
+                            <p class="m-0"><span ng-bind="DewPoint">---</span>&#8451</p>
+                        </button>
+                        
+                        <button type="button" class="btn btn-secondary mt-1 px-4 py-1">
+                            <h6 class="m-0">Wet Bulb</h6>
+                            <p class="m-0"><span ng-bind="WetBulb">---</span>&#8451</p>
+                        </button>
+
+                        <button type="button" class="btn btn-secondary mt-1 px-4 py-1">
+                            <h6 class="m-0">Heat Index</h6>
+                            <p class="m-0"><span ng-bind="HeatIndex">---</span>&#8451</p>
+                        </button>
+
+                        <button type="button" class="btn btn-secondary mt-1 px-4 py-1">
+                            <h6 class="m-0">Wind Chill</h6>
+                            <p class="m-0"><span ng-bind="WindChill">---</span>&#8451</p>
+                        </button>
+
+                        <button type="button" class="btn btn-secondary mt-1 px-4 py-1">
+                            <h6 class="m-0">Thw Index</h6>
+                            <p class="m-0"><span ng-bind="ThwIndex">---</span>&#8451</p>
+                        </button>
+
+                        <button type="button" class="btn btn-secondary mt-1 px-4 py-1">
+                            <h6 class="m-0">Thsw Index</h6>
+                            <p class="m-0"><span ng-bind="ThswIndex">---</span>&#8451</p>
+                        </button>
+
+                        <button type="button" class="btn btn-secondary mt-1 px-4 py-1">
+                            <h6 class="m-0">Solar Rad</h6>
+                            <p class="m-0"><span ng-bind="SolarRad">---</span>&#8451</p>
+                        </button>
+
+                        <button type="button" class="btn btn-secondary mt-1 px-4 py-1">
+                            <h6 class="m-0">UV Index</h6>
+                            <p class="m-0"><span ng-bind="UvIndex">---</span>&#8451</p>
+                        </button>
+
+                    </div>
+                </div>
+
+                <div class="row pb-3 px-3 m-0">
+                    <div class="col text-center">
+                        
+                        <h3 class="py-3">Indoor Conditions</h3>
+
+                        <button type="button" class="btn btn-secondary mt-1 px-4 py-1">
+                            <h6 class="m-0">Indoor Feels</h6>
+                            <p class="m-0"><span ng-bind="InAppTempBottom">---</span>&#8451</p>
+                        </button>
+
+                        <button type="button" class="btn btn-secondary mt-1 px-4 py-1">
+                            <h6 class="m-0">Temp. Indoor</h6>
+                            <p class="m-0"><span ng-bind="InTempBottom">---</span>&#8451</p>
+                        </button>
+
+                        <button type="button" class="btn btn-secondary mt-1 px-4 py-1">
+                            <h6 class="m-0">Hum. Indoor</h6>
+                            <p class="m-0"><span ng-bind="InHumBottom">---</span>&percnt;</p>
+                        </button>
+
+                        <button type="button" class="btn btn-secondary mt-1 px-4 py-1">
+                            <h6 class="m-0">Dew Indoor</h6>
+                            <p class="m-0"><span ng-bind="InDewPoint">---</span>&#8451</p>
+                        </button>
+
+                        <button type="button" class="btn btn-secondary mt-1 px-4 py-1">
+                            <h6 class="m-0">Heat Indoor</h6>
+                            <p class="m-0"><span ng-bind="InHeatIndex">---</span>&#8451</p>
+                        </button>
+
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </body>
+</html>

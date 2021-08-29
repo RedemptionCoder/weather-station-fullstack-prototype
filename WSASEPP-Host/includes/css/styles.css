@@ -1,12 +1,17 @@
+* {
+  box-sizing: inherit;
+}
+
 body {
     margin: 0px;
-    background-color: #3e5e68;
+    background-color: #3e5e68 !important;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   -khtml-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+  line-height:normal;
 
 }
 
@@ -18,13 +23,16 @@ body {
 .heading-title {
   font-family: "Arial",inherit sans-serif;
   font-size: x-large;
+  font-weight:bold;
   text-align: center;
   color: white;
   margin: 0px;
+  line-height:normal;
 }
 
-.MainContent {
-  background-color: #799497;  
+.MainContent, 
+.container_fluid {
+  background-color: #799497 !important;  
 }
 
 .performance-metrics {
@@ -40,6 +48,7 @@ body {
   color: midnightblue;
   padding-top: 3px;
   overflow: auto;
+  line-height: normal;
 }
 
 
@@ -52,7 +61,11 @@ body {
 }
 
 .content h3 {
+  margin-top:1em;
+  margin-bottom:1em;
   font-size: inherit;
+  font-weight:bold;
+  line-height:normal;
 }
 
 #errorbar {
@@ -75,6 +88,9 @@ body {
 .overviewheading {
   color:white;
   font-size: x-large !important;
+  margin-bottom:1em;
+  font-weight:bold;
+  line-height:normal;
 }
 
 .rainfallinfo {
@@ -111,6 +127,7 @@ body {
   height: 40px;
   border-style: solid;
   border-width: 2px;
+  
     
 }
   
@@ -143,6 +160,12 @@ body {
   background-color: lightblue;
 }
 
+.raintime h5 {
+  font-size: 0.8em;
+  font-weight: bold;
+  line-height: normal;
+}
+
 .windlive {
   background-color: #ae5e2d;
   color: #fff;
@@ -151,6 +174,9 @@ body {
 
 .windlive h5 {
   color:white;
+  font-size:0.8em;
+  font-weight:bold;
+  line-height:normal;
 }
 
 .Latency {

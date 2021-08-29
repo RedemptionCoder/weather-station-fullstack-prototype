@@ -1,0 +1,214 @@
+body {
+  margin: 0px;
+
+-webkit-touch-callout: none;
+-webkit-user-select: none;
+-khtml-user-select: none;
+-moz-user-select: none;
+-ms-user-select: none;
+user-select: none;
+
+}
+
+.header {
+background-color: #3e5e68;
+padding: 20px 0;
+}
+
+.heading-title {
+font-family: "Arial",inherit sans-serif;
+font-size: x-large;
+text-align: center;
+color: white;
+margin: 0px;
+}
+
+.MainContent {
+background-color: #799497;  
+}
+
+.performance-metrics {
+width: 80%;
+margin: auto;
+background-color: #ffffff40;
+min-height: 20px;
+padding-left: 10px;
+padding-right: 10px;
+border-bottom-left-radius: 15px;
+border-bottom-right-radius: 15px;
+font-family: courier;
+color: midnightblue;
+padding-top: 3px;
+overflow: auto;
+}
+
+
+.content {
+/* max-width: 896px; */ 
+width: 100%;
+text-align: center;
+margin: auto;
+font-family: "Arial",inherit sans-serif;
+}
+
+.content h3 {
+font-size: inherit;
+}
+
+#errorbar {
+background-color: #c60000;
+color: white;
+padding: 2px 0px;
+font-size: small;
+display: none;
+}
+
+.sections {
+padding-top: 1px;
+padding-bottom: 32px;
+}
+
+.overview {
+background-color: #e5f1f4;
+background-image: linear-gradient(#799497,#799497,white);
+}
+
+.overviewheading {
+color:white;
+font-size: x-large !important;
+}
+
+.rainfallinfo {
+background-color: #eff3ff;
+background-image: linear-gradient(white,#bfdbff,white);
+}
+
+.windinfo {
+background-color: white;
+}
+
+.detailed {
+background-color: white;
+}
+
+.indoor {
+background-color: #806f6f;
+}
+
+.indoor h3 {
+color: white;
+}
+.obsblock {
+background-color: #c9d7db;
+width: 170px;
+text-align: center;
+padding: 10px 0;
+margin: 10px 3px 0 3px;
+border-radius: 15px;
+
+display: inline-grid;
+vertical-align: middle;
+/*opacity:60%;*/
+height: 40px;
+border-style: solid;
+border-width: 2px;
+  
+}
+
+.obsblock h3, h4, h5 {
+margin: 0px;
+color: black;
+}
+
+.obsblock p {
+margin: 3px 0 0;
+}
+
+.essential {
+opacity:100%;
+}
+
+.feels {
+background-color: #73dd73;
+}
+
+.temp {
+  background-color: darksalmon;
+}
+
+.hum {
+  background-color: bisque;
+}
+
+.rain {
+background-color: lightblue;
+}
+
+.windlive {
+background-color: #ae5e2d;
+color: #fff;
+font-weight: bolder;
+}
+
+.windlive h5 {
+color:white;
+}
+
+.Latency {
+float: left;
+}
+
+.LastUpdated {
+float: right;
+}
+
+.CompOrig {
+display:inline;
+}
+
+.CompObs {
+display:none;
+}
+
+.compblock:hover {
+cursor:pointer;
+}
+
+.DataArea {
+display:none;
+}
+
+@media screen and (max-width:420px) {
+.heading-title {
+  font-size:medium;
+}
+.header {
+  padding:3px 0;
+}
+.performance-metrics {
+  width:90%;
+  min-height: 11px;
+  padding-top:2px;
+  font-size:xx-small;
+}
+.overviewheading {
+  font-size: inherit !important;
+  margin: 4px;
+}
+.obsblock {
+  width: 147px;
+}
+.wind p {
+  font-size:small;
+}
+.raintime p {
+  font-size:small;
+}
+.content h3 {
+  font-size: small;
+  font-weight: bolder;
+}
+
+
+}
+

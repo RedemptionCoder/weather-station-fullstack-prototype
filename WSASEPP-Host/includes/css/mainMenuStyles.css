@@ -1,0 +1,114 @@
+.section-rounded-corners {
+    border-radius: 3.25rem;
+}
+
+.text-image {
+    height:1.25em;
+}
+
+.git-icon-button {
+    height: 2.2rem;
+    margin-top: 0.3em;
+    margin-left: 1em;
+}
+
+.xs-framework-icons {
+    display:none;
+}
+
+.text-image-small {
+    height:0.8em;
+}
+
+.mobile-device {
+    display:none;
+}
+
+.svg-icon {
+    fill:currentColor;
+}
+
+.blank-image {
+    display:flex;
+    height:300px;
+    max-width: 300px;
+}
+
+.card-hr {
+    border-style:dashed;
+    border-width:1px;
+}
+
+@media only screen and (max-width: 996px) {
+
+    h1 {
+        font-size:4vw;
+    }   
+    h2 {
+        font-size:3vw;
+    } 
+    h4 {
+        font-size:1rem;
+        margin-bottom:0rem!important;
+    }
+    .front-end-label, .back-end{
+        display:none;
+    }
+
+    h5 {
+        font-size: 1rem;
+        margin-top: 0.5em;
+    }
+
+    .card-body {
+        padding:0.5rem;
+    }
+
+    .card-text {
+        display:none;
+    }
+
+
+}
+
+@media only screen and (max-width: 414px) {
+    .section-rounded-corners {
+        border-radius: 1.25rem;
+    }
+    h1 {
+        font-size:7vw;
+    }
+    h2 {
+        font-size:4vw;
+    }
+    h4 {
+        font-size:1rem;
+        margin-bottom:0rem!important;
+    }
+    .card-text {
+        display:none;
+    }
+    h5 {
+        display:none;
+    }
+    .front-end, .back-end{
+        display:none;
+    }
+    .card-buttons {
+        display:none;
+    }
+    .card-body {
+        padding:0.5rem;
+    }
+    .xs-framework-icons {
+        font-size:0.9rem;
+        display:inline;
+    }
+    .text-image-small {
+        height:0.8em;
+    }
+    .mobile-device {
+        display: contents;
+    }
+
+}

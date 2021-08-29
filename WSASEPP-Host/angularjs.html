@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Live Weather Reading - Altitude Point Cook Live</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" >
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        <link rel="apple-touch-icon" href="./includes/images/angular.png">
+        <meta name="apple-mobile-web-app-title" content="Altitude Weather">
+        <link rel="icon" href="./includes/images/angular.png">
+        <link rel="stylesheet" href="includes/css/styles.css">
+        <script src="includes/js/angular.js"></script>
+        <script src="includes/js/wsasepp.js"></script>
+        <script src="includes/js/wsaseppControl.js"></script>
+    </head>
+    <body>
+        <div ng-app="wsasepp" ng-controller="wsaseppControl">
+            <div class="MainContent">
+                <div class="header">
+                    <div class="content">
+                        <h1 ng-bind="HeadingTitle" class="heading-title">Altitude Point Cook Live Weather Data</h1>
+                    </div>
+                </div>
+                <div id="errorbar" ng-show="isErrorState" ng-style="errorBarBackgroundColour">
+                    <div class="content">
+                        <span ng-bind="errorOutput">&lt;&lt;No Current Errors&gt;&gt;</span>    
+                    </div>
+                </div>
+                <div class="performance-metrics" ng-style="performanceBackgroundColour">
+                    <div class="Latency" ng-style="latencyStyles">Latency: <span ng-bind="Latency">---</span></div>
+                    <div class="LastUpdated" ng-style="latencyStyles">Updated: <span ng-bind="obstime">---</span></div>
+                </div>
+                <div class="livedata">
+                    <div class="overview sections">
+                        <div class="content">
+                        
+                            <h3 class="overviewheading">Weather Overview</h3>
+                            
+                            <div ng-mousedown="switchStations()" class="obsblock compblock essential feels">
+                                <h3>Feels Like</h3>
+                                <p><span ng-bind="AppTemp">---</span>&#8451</p>
+                            </div>
+
+                            <div ng-mousedown="switchStations()" class="obsblock compblock essential temp">
+                                <h3>Temperature</h3>
+                                <p><span ng-bind="Temp">---</span>&#8451</p>
+                            </div>
+                            
+                            <div ng-mousedown="switchStations()" class="obsblock compblock essential hum">
+                                <h3>Humidity</h3>
+                                <p><span ng-bind="Hum">---</span>&percnt;</p>
+                            </div>
+                            
+                            <div ng-mousedown="switchStations()" class="obsblock compblock essential wind">
+                                <h3>Wind Speed <i>(Gust)</i></h3>
+                                <p><span ng-bind="WindSpeedAvgLast_10_min">---</span> km/h <i>(<span ng-bind="WindSpeedHiLast_10_min">---</span> km/h)</i></p>
+                            </div>
+
+                            <div ng-mousedown="switchStations()" class="obsblock compblock essential wind">
+                                <h3>Wind Dir <i>(Gust)</i></h3>
+                                <p><span ng-bind="WindDirScalarAvgLast_10_min">---</span> <i>(<span ng-bind="WindDirAtHiSpeedLast_10_min">---</span>)</i></span></p>
+                            </div>
+                            
+                            <div class="obsblock essential windlive">
+                                <h5>Wind Speed (Live)</h5>
+                                <p><span ng-bind="WindPpeedLast">---</span> km/h</p>
+                            </div>
+
+                            <div class="obsblock essential windlive">
+                                <h5>Wind Dir (Live)</h5>
+                                <p><span ng-bind="WindDirLast">---</span></p>
+                            </div>
+
+                            <div ng-mousedown="switchStations()" class="obsblock compblock essential">
+                                <h3>Pressure</h3>
+                                <p><span ng-bind="BarSeaLevel">---</span>hPa</p>
+                            </div>
+
+                            <div class="obsblock essential rain raintime">
+                                <h3>Rain Storm Start</h3>
+                                <p><span ng-bind="RainStormStartAt">---</span></p>
+                            </div>
+
+                            <div class="obsblock essential rain">
+                                <h3>Rain Storm Amount</h3>
+                                <p><span ng-bind="RainStorm">---</span> mm</p>
+                            </div>
+
+                            <div ng-mousedown="switchStations()" class="obsblock compblock essential rain">
+                                <h3>Rain Today</h3>
+                                <p><span ng-bind="RainfallDaily">---</span> mm</p>
+                            </div>
+
+                            <div class="obsblock essential rain">
+                                <h3>Rain Rate</h3>
+                                <p><span ng-bind="RainRateLast">---</span> mm/hr</p>
+                            </div>
+
+                            <div class="obsblock essential rain">
+                                <h3>Highest Rate</h3>
+                                <p><span ng-bind="RainRateHi">---</span> mm/hr</p>
+                            </div>
+
+                            <div class="obsblock feels">
+                                <h3>Indoor Feels</h3>
+                                <p><span ng-bind="InAppTemp">---</span>&#8451</p>
+                            </div>
+
+                            <div class="obsblock temp">
+                                <h3>Temp. Indoor</h3>
+                                <p><span ng-bind="InTemp">---</span>&#8451</p>
+                            </div>
+
+                            <div class="obsblock hum">
+                                <h3>Hum. Indoor</h3>
+                                <p><span ng-bind="InHum">---</span>&percnt;</p>
+                            </div>
+                            
+                        </div>
+                    </div>
+
+                    <div class="windinfo sections">
+                        <div class="content">
+
+                            <h3>Wind Last 2 Minutes</h3>
+
+                            <div class="obsblock wind">
+                                <h3>Wind Speed <i>(Gust)</i></h3>
+                                <p><span ng-bind="WindSpeedAvgLast_2_min">---</span> km/h <i>(<span ng-bind="WindSpeedHi_last_2_min">---</span> km/h)</i></p>
+                            </div>
+
+                            <div class="obsblock wind">
+                                <h3>Wind Dir <i>(Gust)</i></h3>
+                                <p><span ng-bind="WindDirScalarAvg_last_2_min">---</span> <i>(<span ng-bind="WindDirAtHiSpeedLast_2_min">---</span>)</i></p>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="rainfallinfo sections">
+                        <div class="content">
+
+                            <h3>Rainfall</h3>
+
+                            <div class="obsblock rain">
+                                <h3>Last 15 min</h3>
+                                <p><span ng-bind="RainfallLast_15_min">---</span> mm</p>
+                            </div>
+
+                            <div class="obsblock rain">
+                                <h3>Higest Rate (15min)</h3>
+                                <p><span ng-bind="RainRateHiLast_15_min">---</span> mm/hr</p>
+                            </div>
+
+                            <div class="obsblock rain">
+                                <h3>Last 60 min</h3>
+                                <p><span ng-bind="RainfallLast_60_min">---</span> mm</p>
+                            </div>
+
+                            <div class="obsblock rain">
+                                <h3>Last 24 hr</h3>
+                                <p><span ng-bind="RainfallLast_24_hr">---</span> mm</p>
+                            </div>
+
+                            <div class="obsblock rain raintime">
+                                <h5>Last Rain Event Start</h5>
+                                <p><span ng-bind="RainStormLastStartAt">---</span></p>
+                            </div>
+
+                            <div class="obsblock rain raintime">
+                                <h5>Last Rain Event Ended</h5>
+                                <p><span ng-bind="RainStormLastEndAt">---</span></p>
+                            </div>
+
+                            <div class="obsblock rain">
+                                <h3>Last Storm Amount</h3>
+                                <p><span ng-bind="RainStormLast">---</span> mm</p>
+                            </div>
+
+                            <div class="obsblock rain">
+                                <h3>This Month</h3>
+                                <p><span ng-bind="RainfallMonthly">---</span> mm</p>
+                            </div>
+
+                            <div class="obsblock rain">
+                                <h3>This Year</h3>
+                                <p><span ng-bind="RainfallYear">---</span> mm</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="detailed sections">
+                        <div class="content"> 
+
+                            <h3>Other</h3>
+
+                            <div ng-mousedown="switchStations()" class="obsblock compblock temp">
+                                <h3>Dew Point</h3>
+                                <p><span ng-bind="DewPoint">---</span>&#8451</p>
+                            </div>
+                            
+                            <div class="obsblock temp">
+                                <h3>Wet Bulb</h3>
+                                <p><span ng-bind="WetBulb">---</span>&#8451</p>
+                            </div>
+
+                            <div class="obsblock temp">
+                                <h3>Heat Index</h3>
+                                <p><span ng-bind="HeatIndex">---</span>&#8451</p>
+                            </div>
+
+                            <div class="obsblock temp">
+                                <h3>Wind Chill</h3>
+                                <p><span ng-bind="WindChill">---</span>&#8451</p>
+                            </div>
+
+                            <div class="obsblock temp">
+                                <h3>Thw Index</h3>
+                                <p><span ng-bind="ThwIndex">---</span>&#8451</p>
+                            </div>
+
+                            <div class="obsblock temp">
+                                <h3>Thsw Index</h3>
+                                <p><span ng-bind="ThswIndex">---</span>&#8451</p>
+                            </div>
+
+                            <div class="obsblock">
+                                <h3>Solar Rad</h3>
+                                <p><span ng-bind="SolarRad">---</span>&#8451</p>
+                            </div>
+
+                            <div class="obsblock">
+                                <h3>UV Index</h3>
+                                <p><span ng-bind="UvIndex">---</span>&#8451</p>
+                            </div>
+                        </div>
+                    </div>
+                        
+
+                    <div class="indoor sections">
+                        <div class="content">
+
+                            <h3>Indoor Conditions</h3>
+
+                            <div class="obsblock feels">
+                                <h3>Indoor Feels</h3>
+                                <p><span ng-bind="InAppTempBottom">---</span>&#8451</p>
+                            </div>
+
+                            <div class="obsblock temp">
+                                <h3>Temp. Indoor</h3>
+                                <p><span ng-bind="InTempBottom">---</span>&#8451</p>
+                            </div>
+
+                            <div class="obsblock hum">
+                                <h3>Hum. Indoor</h3>
+                                <p><span ng-bind="InHumBottom">---</span>&percnt;</p>
+                            </div>
+
+                            <div class="obsblock temp">
+                                <h3>Dew Indoor</h3>
+                                <p><span ng-bind="InDewPoint">---</span>&#8451</p>
+                            </div>
+
+                            <div class="obsblock temp">
+                                <h3>Heat Indoor</h3>
+                                <p><span ng-bind="InHeatIndex">---</span>&#8451</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
