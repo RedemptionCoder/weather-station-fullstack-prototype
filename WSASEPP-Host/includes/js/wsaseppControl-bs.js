@@ -18,6 +18,10 @@ const BOM_COMPARISON_STATION_URL = "http://www.bom.gov.au/fwo/IDV60901/IDV60901.
 // The amount of minutes to wait untill it's time to refresh bom data
 const BOM_STATION_REFRESH_INTERVAL = 10;
 
+// the amount of minutes to wait before checking for updated data after 
+// the bom update interval has passed. 
+const BOM_UPDATE_CHECK_FREQ = 1;
+
 // The amount of time the comparison data is shown
 const COMPARISON_TIMEOUT = 10000;
 
@@ -82,7 +86,10 @@ app.controller("wsaseppControl", function($scope, $http, $interval, $timeout, $C
      * Gets live the weather data from the WSASEPP server
      */
     $scope.getWeatherData = function() {
-            
+
+        // Check for updated observation data from bom
+        $scope.checkBomUpdates();
+
         // use Get method as this enables for bookmarking etc.
         // there is no sensitive data here. 
 
@@ -300,7 +307,10 @@ app.controller("wsaseppControl", function($scope, $http, $interval, $timeout, $C
             $scope.bomRainfallDaily = jsonData.observations.data[0].rain_trace;
             $scope.bomDewPoint = jsonData.observations.data[0].dewpt;
             $scope.bomTimestamp = jsonData.observations.data[0].aifstime_utc;
-        
+            
+            // Create the date object for the bom timestamp
+            $scope.bomTimeStampDateObject = $scope.getDateFromFullString($scope.bomTimestamp,true);
+
         } catch (e) {return false;}
 
         return true;
@@ -381,19 +391,41 @@ app.controller("wsaseppControl", function($scope, $http, $interval, $timeout, $C
 
         // Get the current date and time as UTC 
         let lCurrentTime = new Date();
-        
-        // Get the current bom obs timestamp from the data area of the page
-        let lObsTimestampStr = $scope.bomTimestamp;
 
         try {
-
-            // Create the date object for the bom timestamp
-            let lObsTimestamp = $scope.getDateFromFullString(lObsTimestampStr,true);
             
             // Determine the difference in current time and observation timestamp
-            let lTimeElapsed = lCurrentTime-lObsTimestamp;
+            let lTimeElapsed = lCurrentTime-$scope.bomTimeStampDateObject;
 
-            if (lTimeElapsed > (BOM_STATION_REFRESH_INTERVAL*60*1000)) {$scope.getBomData();} 
+            if (lTimeElapsed > (BOM_STATION_REFRESH_INTERVAL*60*1000)) {
+                
+                // Record the current bom timestamp for comparison with the new data
+                let lOldBomTimeStamp = $scope.bomTimeStampDateObject;
+
+                // Find out how long it has been since the last bom check
+                lTimeElapsed = lCurrentTime - $scope.lastBomCheckTime;
+                
+                // If it has been more than the required amount of mintues since the last 
+                // check, check again.
+                if (lTimeElapsed > (BOM_UPDATE_CHECK_FREQ*60*1000)) {
+                    
+                    // Get the data from bom
+                    $scope.getBomData();
+
+                    if (lOldBomTimeStamp==$scope.bomTimeStampDateObject) {
+                        
+                        // Record the time the bom check was done
+                        $scope.lastBomCheckTime = new Date();
+
+                    } else {
+
+                        // Force update popover data
+                        $('[data-toggle="popover"]').dispose();
+                        $('[data-toggle="popover"]').popover();
+                        
+                    }
+                }
+            } 
 
         } catch (e) {return false;}
 
@@ -691,6 +723,9 @@ app.controller("wsaseppControl", function($scope, $http, $interval, $timeout, $C
 
         // Initialise the bom data timestamp
         $scope.bomTimestamp = "";
+
+        // Initialise the last bom check time with the current time
+        $scope.lastBomCheckTime = new Date();
 
         // Initialise server info display
         $scope.Latency = "---";

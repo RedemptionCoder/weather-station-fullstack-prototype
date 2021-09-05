@@ -70,27 +70,27 @@
                         
                             <h3 class="overviewheading">Weather Overview</h3>
                             
-                            <div data-toggle="popover" data-placement="bottom" data-content="{{bomAppTemp}}&#8451 at {{bomHeadingTitle}}" ng-mousedown="checkBomUpdates()" class="obsblock compblock essential feels">
+                            <div data-toggle="popover" data-placement="bottom" data-content="{{bomAppTemp}}&#8451 at {{bomHeadingTitle}}" class="obsblock compblock essential feels">
                                 <h3>Feels Like</h3>
                                 <p><span ng-bind="AppTemp">---</span>&#8451</p>
                             </div>
 
-                            <div data-toggle="popover" data-placement="bottom" data-content="{{bomTemp}}&#8451 at {{bomHeadingTitle}}" ng-mousedown="checkBomUpdates()" class="obsblock compblock essential temp">
+                            <div data-toggle="popover" data-placement="bottom" data-content="{{bomTemp}}&#8451 at {{bomHeadingTitle}}" class="obsblock compblock essential temp">
                                 <h3>Temperature</h3>
                                 <p><span ng-bind="Temp">---</span>&#8451</p>
                             </div>
                             
-                            <div data-toggle="popover" data-placement="bottom" data-content="{{bomHum}}&percnt; at {{bomHeadingTitle}}" ng-mousedown="checkBomUpdates()" class="obsblock compblock essential hum">
+                            <div data-toggle="popover" data-placement="bottom" data-content="{{bomHum}}&percnt; at {{bomHeadingTitle}}" class="obsblock compblock essential hum">
                                 <h3>Humidity</h3>
                                 <p><span ng-bind="Hum">---</span>&percnt;</p>
                             </div>
                             
-                            <div data-toggle="popover" data-placement="bottom" data-content="{{bomWindSpeedAvgLast_10_min}} km/h ({{bomWindSpeedHiLast_10_min}} km/h) at {{bomHeadingTitle}}" ng-mousedown="checkBomUpdates()" class="obsblock compblock essential wind">
+                            <div data-toggle="popover" data-placement="bottom" data-content="{{bomWindSpeedAvgLast_10_min}} km/h ({{bomWindSpeedHiLast_10_min}} km/h) at {{bomHeadingTitle}}" class="obsblock compblock essential wind">
                                 <h3>Wind Speed <i>(Gust)</i></h3>
                                 <p><span ng-bind="WindSpeedAvgLast_10_min">---</span> km/h <i>(<span ng-bind="WindSpeedHiLast_10_min">---</span> km/h)</i></p>
                             </div>
 
-                            <div data-toggle="popover" data-placement="bottom" data-content="{{bomWindDirScalarAvgLast_10_min}} (na) at {{bomHeadingTitle}}" ng-mousedown="checkBomUpdates()" class="obsblock compblock essential wind">
+                            <div data-toggle="popover" data-placement="bottom" data-content="{{bomWindDirScalarAvgLast_10_min}} (na) at {{bomHeadingTitle}}" class="obsblock compblock essential wind">
                                 <h3>Wind Dir <i>(Gust)</i></h3>
                                 <p><span ng-bind="WindDirScalarAvgLast_10_min">---</span> <i>(<span ng-bind="WindDirAtHiSpeedLast_10_min">---</span>)</i></span></p>
                             </div>
@@ -105,7 +105,7 @@
                                 <p><span ng-bind="WindDirLast">---</span></p>
                             </div>
 
-                            <div data-toggle="popover" data-placement="bottom" data-content="{{bomBarSeaLevel}}hPa at {{bomHeadingTitle}}" ng-mousedown="checkBomUpdates()" class="obsblock compblock essential">
+                            <div data-toggle="popover" data-placement="bottom" data-content="{{bomBarSeaLevel}}hPa at {{bomHeadingTitle}}" class="obsblock compblock essential">
                                 <h3>Pressure</h3>
                                 <p><span ng-bind="BarSeaLevel">---</span>hPa</p>
                             </div>
@@ -120,7 +120,7 @@
                                 <p><span ng-bind="RainStorm">---</span> mm</p>
                             </div>
 
-                            <div data-toggle="popover" data-placement="bottom" data-content="{{bomRainfallDaily}} mm at {{bomHeadingTitle}}" ng-mousedown="checkBomUpdates()" class="obsblock compblock essential rain">
+                            <div data-toggle="popover" data-placement="bottom" data-content="{{bomRainfallDaily}} mm at {{bomHeadingTitle}}" class="obsblock compblock essential rain">
                                 <h3>Rain Today</h3>
                                 <p><span ng-bind="RainfallDaily">---</span> mm</p>
                             </div>
@@ -228,7 +228,7 @@
 
                             <h3>Other</h3>
 
-                            <div data-toggle="popover" data-placement="bottom" data-content="{{bomDewPoint}} &#8451 at {{bomHeadingTitle}}" ng-mousedown="checkBomUpdates()" class="obsblock compblock temp">
+                            <div data-toggle="popover" data-placement="bottom" data-content="{{bomDewPoint}} &#8451 at {{bomHeadingTitle}}" class="obsblock compblock temp">
                                 <h3>Dew Point</h3>
                                 <p><span ng-bind="DewPoint">---</span>&#8451</p>
                             </div>
